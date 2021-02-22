@@ -1,18 +1,13 @@
 # TODO
 
 - scroller background that simulates 'loading rows'
-- make it work with only a few rows
-- update all rows
-- columns (types)
-- fixed header
 - change column sizes
-- fixed first column
+- sticky first column
+  - no flexbox...
 - row editable
   - start scroll, stop edit
 - hide column
+- table class returns its own instance thing?
+- clean up watchers and event handlers?
 
-## issue with adding when scrolled to bottom...
-
-- default, add to bottom.
-- when last row is displayed, add to top
-- check for each row separately
+https://css-tricks.com/snippets/css/complete-guide-grid/

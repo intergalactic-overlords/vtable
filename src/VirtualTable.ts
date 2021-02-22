@@ -55,17 +55,26 @@ class VirtualTable {
     }
     this.visibleRows =
       Math.floor(this.container.clientHeight / this.rowHeight) + 1;
+    this.container.appendChild(this.createHeader());
     this.container.appendChild(this.scroller);
     this.createVirtualRows().forEach((r) => {
       this.scroller.appendChild(r);
     });
 
     this.container.addEventListener("scroll", this.handleScroll);
-
-    if (this.resizeObserver) {
-      this.resizeObserver.observe(this.container);
-    }
+    this.resizeObserver.observe(this.container);
   }
+
+  private createHeader = () => {
+    const header = document.createElement("div");
+    header.className = "header";
+    header.append(
+      ...this.columns.map((c) => {
+        return this.createHeadCell(c);
+      })
+    );
+    return header;
+  };
 
   private createContainer = () => {
     const container = document.createElement("div");
@@ -206,25 +215,6 @@ class VirtualTable {
     }
   };
 
-  // private addVirtualRowsToBottom = (newVisibleRows: number) => {
-  //   for (let i = this.visibleRows; i < newVisibleRows; i++) {
-  //     const nextIndex = this.hiddenRowsTop + i;
-  //     const rowToAdd = this.createRow(nextIndex, newVisibleRows);
-
-  //     this.scroller.appendChild(rowToAdd);
-  //   }
-  // };
-
-  // private addVirtualRowsToTop = (newVisibleRows: number) => {
-  //   const rowsToAdd = newVisibleRows - this.visibleRows;
-  //   for (let i = 1; i < rowsToAdd + 1; i++) {
-  //     const nextIndex = this.hiddenRowsTop - i;
-  //     const rowToAdd = this.createRow(nextIndex, newVisibleRows);
-
-  //     this.scroller.appendChild(rowToAdd);
-  //   }
-  // };
-
   private scrolledToBottom = () => {
     return (
       this.container &&
@@ -248,13 +238,38 @@ class VirtualTable {
 
   private createTextCell = (index: number, columnId: string) => {
     const cell = document.createElement("div");
-    cell.classList.add("cell", "cell-text");
+    cell.classList.add("cell", `cell-${columnId}`, "cell-text");
     if (this.rows[index]) {
       cell.innerHTML = this.rows[index][columnId];
     } else {
       cell.classList.add("cell-empty");
     }
     return cell;
+  };
+
+  private createHeadCell = (column: TColumn) => {
+    const cell = document.createElement("div");
+    cell.classList.add("cell", "cell-head");
+    cell.innerHTML = column.label;
+    return cell;
+  };
+
+  public updateRows = (rows: TRow[]) => {
+    this.totalRows = rows.length;
+    this.scroller.style.height = `${this.rowHeight * this.totalRows}px`;
+    this.rows = rows;
+
+    if (this.container) {
+      this.container.scrollTop = 0;
+    }
+
+    while (this.scroller.firstChild) {
+      this.scroller.removeChild(this.scroller.firstChild);
+    }
+
+    this.createVirtualRows().forEach((r) => {
+      this.scroller.appendChild(r);
+    });
   };
 }
 

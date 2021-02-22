@@ -1,9 +1,14 @@
-import { TColumn } from "./types";
+import { TColumn, TRow } from "./types";
 import VirtualTable from "./VirtualTable";
 
-const items = [];
-for (var i = 0; i < 25; i++) {
+const items: TRow[] = [];
+for (let i = 0; i < 99; i++) {
   items[items.length] = { a: "a" + i, b: "b" + i, c: "c" + i };
+}
+
+const items2: TRow[] = [];
+for (let i = 0; i < 20; i++) {
+  items2[items2.length] = { a: "x" + i, b: "y" + i, c: "z" + i };
 }
 
 const columns: TColumn[] = [
@@ -19,4 +24,9 @@ const vTable = new VirtualTable(
   },
   columns,
   items
-).mount("#app");
+);
+vTable.mount("#app");
+
+window.newContent = () => {
+  vTable.updateRows(items2);
+};

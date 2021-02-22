@@ -25,42 +25,16 @@ body {
   cursor: grabbing;
 }
 
-.container {
-  background: lightpink;
-  box-sizing: border-box;
-  height: 100%;
-  overflow: auto;
-  position: relative;
-  width: 408px;
+#controls {
+  margin-top: 10px;
 }
 
-.scroller {
-  align-items: stretch;
-  background: white;
-  background-image: repeating-linear-gradient(
-    -45deg,
-    transparent,
-    transparent 24px,
-    rgba(0, 0, 0, 0.07) 24px,
-    rgba(0, 0, 0, 0.07) 48px
-  );
-  box-sizing: border-box;
-  position: absolute;
-  display: flex;
-  flex-flow: row nowrap;
-  overflow: hidden;
-  width: 100%;
+/* .cell-a {
+  left: 0;
+  position: fixed;
+  width: 200px;
 }
 
-.row {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: row;
-  position: absolute;
-  width: 100%;
-}
-
-.cell {
-  width: 100px;
-}
+.cell-b {
+  margin-left: 200px;
+} */
