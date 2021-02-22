@@ -9,3 +9,4 @@
 - fixed first column
 - row editable
   - start scroll, stop edit
+- hide column

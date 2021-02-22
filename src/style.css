@@ -55,11 +55,12 @@ body {
 .row {
   border-bottom: 1px solid rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
+  display: flex;
+  flex-direction: row;
   position: absolute;
   width: 100%;
 }
 
-.row-container {
-  background-color: rgba(220, 150, 220, 0.2);
-  width: 100%;
+.cell {
+  width: 100px;
 }

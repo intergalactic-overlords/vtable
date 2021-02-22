@@ -98,7 +98,7 @@ class VirtualTable {
     row.style.height = `${this.rowHeight}px`;
     row.style.transform = `translate(0px, ${offsetHeight}px)`;
     // event handler to display data
-    row.innerHTML = this.rows[index].a;
+    row.replaceChildren(...this.createCells(index));
     if (this.debug) {
       row.style.backgroundColor = this.calculateBG(index);
     }
@@ -144,18 +144,9 @@ class VirtualTable {
   private rowIndexMutationCallback = (mutationsList: MutationRecord[]) => {
     mutationsList.forEach((mutation) => {
       if (mutation.type === "attributes") {
-        const row = this.rows[mutation.target.dataset.index];
-        if (!row) {
-          // it's possible there is one row too much.
-          // when containerheight % rowheight = 0
-          // and the table is scrolled to the end
-          // it can just stay empty, it will be hidden
-          (mutation.target as Element).innerHTML = "";
-        } else {
-          (mutation.target as Element).innerHTML = this.rows[
-            (mutation.target as Element).dataset.index
-          ].a;
-        }
+        (mutation.target as Element).replaceChildren(
+          ...this.createCells((mutation.target as Element).dataset.index)
+        );
       }
     });
   };
@@ -229,6 +220,28 @@ class VirtualTable {
         this.container.clientHeight <
         1
     );
+  };
+
+  private createCells = (index: number) => {
+    return this.columns.map((c) => {
+      switch (c.type) {
+        case "text":
+          return this.createTextCell(index, c.id);
+        default:
+          return "";
+      }
+    });
+  };
+
+  private createTextCell = (index: number, columnId: string) => {
+    const cell = document.createElement("div");
+    cell.classList.add("cell", "cell-text");
+    if (this.rows[index]) {
+      cell.innerHTML = this.rows[index][columnId];
+    } else {
+      cell.classList.add("cell-empty");
+    }
+    return cell;
   };
 }
 
