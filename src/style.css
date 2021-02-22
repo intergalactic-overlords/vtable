@@ -1,0 +1,65 @@
+body {
+  font-family: monospace;
+  font-size: 15;
+}
+
+#app {
+  background: lightgoldenrodyellow;
+  height: 320px;
+  position: relative;
+  width: 100%;
+}
+#app::after {
+  background: red;
+  bottom: 0;
+  content: " ";
+  cursor: grab;
+  display: block;
+  height: 3px;
+  position: absolute;
+  right: 0;
+  width: 100%;
+  z-index: 55;
+}
+#app::after:active {
+  cursor: grabbing;
+}
+
+.container {
+  background: lightpink;
+  box-sizing: border-box;
+  height: 100%;
+  overflow: auto;
+  position: relative;
+  width: 408px;
+}
+
+.scroller {
+  align-items: stretch;
+  background: white;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 24px,
+    rgba(0, 0, 0, 0.07) 24px,
+    rgba(0, 0, 0, 0.07) 48px
+  );
+  box-sizing: border-box;
+  position: absolute;
+  display: flex;
+  flex-flow: row nowrap;
+  overflow: hidden;
+  width: 100%;
+}
+
+.row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+  position: absolute;
+  width: 100%;
+}
+
+.row-container {
+  background-color: rgba(220, 150, 220, 0.2);
+  width: 100%;
+}
