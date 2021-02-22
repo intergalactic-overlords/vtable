@@ -164,13 +164,7 @@ class VirtualTable {
     const newVisibleRows = Math.floor(height / this.rowHeight) + 1;
     if (newVisibleRows !== this.visibleRows) {
       if (newVisibleRows > this.visibleRows) {
-        if (this.scrolledToBottom()) {
-          this.addVirtualRowsToTop(newVisibleRows);
-        } else {
-          this.addVirtualRowsToEnd(newVisibleRows);
-        }
-        // this.addVirtualRowsToTop(newVisibleRows);
-        // if scrolled to bottom?
+        this.addVirtualRows(newVisibleRows);
       } else if (newVisibleRows < this.visibleRows) {
         this.removeVirtualRows(newVisibleRows);
       }
@@ -193,24 +187,43 @@ class VirtualTable {
     }
   };
 
-  private addVirtualRowsToEnd = (newVisibleRows: number) => {
+  private addVirtualRows = (newVisibleRows: number) => {
     for (let i = this.visibleRows; i < newVisibleRows; i++) {
       const nextIndex = this.hiddenRowsTop + i;
-      const rowToAdd = this.createRow(nextIndex, newVisibleRows);
-
-      this.scroller.appendChild(rowToAdd);
+      if (nextIndex !== this.rows.length) {
+        const rowToAdd = this.createRow(nextIndex, newVisibleRows);
+        this.scroller.appendChild(rowToAdd);
+      } else {
+        const firstChild = this.scroller.children[0] as HTMLDivElement;
+        if (firstChild && firstChild.dataset.index) {
+          const firstIndex = parseInt(firstChild.dataset.index, 10);
+          if (firstIndex > 0) {
+            const rowToAdd = this.createRow(firstIndex - 1, newVisibleRows);
+            this.scroller.appendChild(rowToAdd);
+          }
+        }
+      }
     }
   };
 
-  private addVirtualRowsToTop = (newVisibleRows: number) => {
-    const rowsToAdd = newVisibleRows - this.visibleRows;
-    for (let i = 1; i < rowsToAdd + 1; i++) {
-      const nextIndex = this.hiddenRowsTop - i;
-      const rowToAdd = this.createRow(nextIndex, newVisibleRows);
+  // private addVirtualRowsToBottom = (newVisibleRows: number) => {
+  //   for (let i = this.visibleRows; i < newVisibleRows; i++) {
+  //     const nextIndex = this.hiddenRowsTop + i;
+  //     const rowToAdd = this.createRow(nextIndex, newVisibleRows);
 
-      this.scroller.appendChild(rowToAdd);
-    }
-  };
+  //     this.scroller.appendChild(rowToAdd);
+  //   }
+  // };
+
+  // private addVirtualRowsToTop = (newVisibleRows: number) => {
+  //   const rowsToAdd = newVisibleRows - this.visibleRows;
+  //   for (let i = 1; i < rowsToAdd + 1; i++) {
+  //     const nextIndex = this.hiddenRowsTop - i;
+  //     const rowToAdd = this.createRow(nextIndex, newVisibleRows);
+
+  //     this.scroller.appendChild(rowToAdd);
+  //   }
+  // };
 
   private scrolledToBottom = () => {
     return (

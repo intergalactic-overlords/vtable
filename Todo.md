@@ -10,3 +10,9 @@
 - row editable
   - start scroll, stop edit
 - hide column
+
+## issue with adding when scrolled to bottom...
+
+- default, add to bottom.
+- when last row is displayed, add to top
+- check for each row separately

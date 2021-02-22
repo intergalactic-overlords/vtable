@@ -2,7 +2,7 @@ import { TColumn } from "./types";
 import VirtualTable from "./VirtualTable";
 
 const items = [];
-for (var i = 0; i < 10000; i++) {
+for (var i = 0; i < 25; i++) {
   items[items.length] = { a: "a" + i, b: "b" + i, c: "c" + i };
 }
 
