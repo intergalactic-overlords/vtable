@@ -1,4 +1,4 @@
-import { TRow, TColumn, TConfig } from "./types";
+import { TRow, TColumnSetting, TColumn, TConfig } from "./types";
 
 class VirtualTable {
   columns: TColumn[] = [];
@@ -30,6 +30,11 @@ class VirtualTable {
     subtree: false
   };
 
+  onChangeColumnWidth: (columns: TColumnSetting) => void;
+
+  static DEFAULT_COLUMN_MIN_WIDTH = 40;
+  static DEFAULT_COLUMN_WIDTH = 200;
+
   constructor(config: TConfig, columns: TColumn[], rows: TRow[]) {
     if (config.rowHeight) {
       this.rowHeight = config.rowHeight;
@@ -45,6 +50,7 @@ class VirtualTable {
       this.rowIndexMutationCallback
     );
     this.resizeObserver = this.createNewResizeObserver();
+    this.onChangeColumnWidth = config.onChangeColumnWidth;
   }
 
   public mount(selector: string) {
@@ -70,7 +76,7 @@ class VirtualTable {
     header.className = "header";
     header.append(
       ...this.columns.map((c) => {
-        return this.createHeadCell(c);
+        return this.createHead(c);
       })
     );
     return header;
@@ -153,6 +159,7 @@ class VirtualTable {
   private rowIndexMutationCallback = (mutationsList: MutationRecord[]) => {
     mutationsList.forEach((mutation) => {
       if (mutation.type === "attributes") {
+        // TODO: mutate instead of replace?
         (mutation.target as Element).replaceChildren(
           ...this.createCells((mutation.target as Element).dataset.index)
         );
@@ -215,44 +222,8 @@ class VirtualTable {
     }
   };
 
-  private scrolledToBottom = () => {
-    return (
-      this.container &&
-      this.container.scrollHeight -
-        this.container.scrollTop -
-        this.container.clientHeight <
-        1
-    );
-  };
-
-  private createCells = (index: number) => {
-    return this.columns.map((c) => {
-      switch (c.type) {
-        case "text":
-          return this.createTextCell(index, c.id);
-        default:
-          return "";
-      }
-    });
-  };
-
-  private createTextCell = (index: number, columnId: string) => {
-    const cell = document.createElement("div");
-    cell.classList.add("cell", `cell-${columnId}`, "cell-text");
-    if (this.rows[index]) {
-      cell.innerHTML = this.rows[index][columnId];
-    } else {
-      cell.classList.add("cell-empty");
-    }
-    return cell;
-  };
-
-  private createHeadCell = (column: TColumn) => {
-    const cell = document.createElement("div");
-    cell.classList.add("cell", "cell-head");
-    cell.innerHTML = column.label;
-    return cell;
-  };
+  private createCells = (rowIndex: number) =>
+    this.columns.map((c) => this.createCell(rowIndex, c));
 
   public updateRows = (rows: TRow[]) => {
     this.totalRows = rows.length;
@@ -271,6 +242,118 @@ class VirtualTable {
       this.scroller.appendChild(r);
     });
   };
+
+  // Head methods
+  private createHead = (column: TColumn) => {
+    const head = document.createElement("div");
+    head.append(column.label);
+    head.classList.add("head");
+    if (column.resizable) {
+      const resizer = document.createElement("div");
+      resizer.classList.add("resizer");
+      head.append(resizer);
+    }
+    head.style.minWidth = `${
+      column.minWidth || VirtualTable.DEFAULT_COLUMN_MIN_WIDTH
+    }px`;
+    head.style.width = `${column.width || VirtualTable.DEFAULT_COLUMN_WIDTH}px`;
+    head.dataset.celltype = column.type;
+    head.dataset.columnid = column.id;
+    this.setColumnListeners(head);
+    return head;
+  };
+
+  // Cell methods
+  // TODO: separate class?
+
+  private createCell = (index: number, column: TColumn) => {
+    const cell = document.createElement("div");
+    cell.classList.add("cell", "cell-text");
+    if (this.rows[index]) {
+      cell.append(this.rows[index][column.id]);
+    } else {
+      cell.classList.add("cell-empty");
+    }
+    cell.style.minWidth = `${
+      column.minWidth || VirtualTable.DEFAULT_COLUMN_MIN_WIDTH
+    }px`;
+    cell.style.width = `${column.width || VirtualTable.DEFAULT_COLUMN_WIDTH}px`;
+    cell.dataset.celltype = column.type;
+    cell.dataset.columnid = column.id;
+    cell.dataset.rowid = `${index}`;
+    return cell;
+  };
+
+  // private createTextCell = (index: number, column: TColumn) => {
+  //   const cell = document.createElement("div");
+  //   cell.classList.add("cell", "cell-text");
+  //   if (this.rows[index]) {
+  //     cell.append(this.rows[index][column.id]);
+  //   } else {
+  //     cell.classList.add("cell-empty");
+  //   }
+  //   cell.style.minWidth = `${
+  //     column.minWidth || VirtualTable.DEFAULT_COLUMN_MIN_WIDTH
+  //   }px`;
+  //   cell.style.width = `${column.width || VirtualTable.DEFAULT_COLUMN_WIDTH}px`;
+  //   return cell;
+  // };
+
+  private setColumnListeners = (div: HTMLDivElement) => {
+    let pageX;
+    let curCol;
+    let columnId: string;
+    let curColWidth;
+    const onChangeColumnWidth = this.onChangeColumnWidth;
+    div.addEventListener("mousedown", function (e) {
+      if (e.target) {
+        curCol = e.target.parentElement;
+        columnId = curCol.dataset.columnid;
+        pageX = e.pageX;
+        curColWidth = curCol.offsetWidth;
+      }
+    });
+
+    document.addEventListener("mousemove", function (e) {
+      if (curCol) {
+        var diffX = e.pageX - pageX;
+
+        const cells = document.querySelectorAll(
+          `.head[data-columnid="${columnId}"], .cell[data-columnid="${columnId}"]`
+        );
+
+        const newWidth = curColWidth + diffX;
+        onChangeColumnWidth({
+          id: columnId,
+          width: newWidth
+        });
+        cells.forEach((c) => {
+          c.style.width = `${newWidth}px`;
+        });
+      }
+    });
+
+    document.addEventListener("mouseup", function (e) {
+      curCol = undefined;
+      columnId = undefined;
+      pageX = undefined;
+      curColWidth = undefined;
+    });
+  };
+
+  private editCell = () => {};
+
+  private deleteCell = () => {};
+
+  private cancelEditCell = () => {};
+
+  private saveEditCell = () => {};
+
+  private setCellWidth = () => {};
+
+  private hideCell = () => {};
+
+  private showCell = () => {};
 }
 
 export default VirtualTable;
